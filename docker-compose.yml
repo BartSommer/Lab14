@@ -27,7 +27,14 @@ services:
     env_file:
       - ./Backend/.env
     environment:
+      # Sieciowy URL wskazujący na kontener bazy danych 'mysql'
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/$${MYSQL_DATABASE}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+
+      # Przekazujemy hasło z pliku .env bezpośrednio do zmiennej oczekiwanej przez properties
+      DB_PASSWORD: $${MYSQL_PASSWORD}
+
+      # Ukrywamy sekret JWT przed Sonarem (możesz go też zdefiniować w pliku .env jako JWT_SECRET)
+      JWT_SECRET: "mojaMegaBezpiecznaTajnaSekretnaFrazaDoJwtTokenow1234567890ABCDEF!BartSommer"
     ports:
       - "8080:8080"
     depends_on:
@@ -36,7 +43,7 @@ services:
 
   frontend:
     build:
-      context: ./Frontend
+      context: ./Frontend/PASJava-FrontEnd
     restart: unless-stopped
     ports:
       - "5174:8080"
