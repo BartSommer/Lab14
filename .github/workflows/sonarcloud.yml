@@ -26,7 +26,10 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build backend
-        run: mvn clean install -DskipTests -f backend/**/pom.xml
+        run: |
+          POM_PATH=$(find backend -name "pom.xml" -print -quit)
+          echo "Znaleziony plik POM: $POM_PATH"
+          mvn clean install -DskipTests -f "$POM_PATH"
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
