@@ -30,35 +30,78 @@ const AddGroupTransaction = ({
   const [selectedUserIds, setSelectedUserIds] = useState<Id[]>([]);
   const [hasCustomParticipants, setHasCustomParticipants] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const currentUserId = user?.id !== undefined ? String(user.id) : "";
+  const currentUserId = String(user?.id ?? "");
 
   const memberIds = useMemo(() => members.map((member) => member.userId), [members]);
-  const effectiveSelectedUserIds = useMemo(() => {
-    if (!hasCustomParticipants) return memberIds;
+  const effectiveSelectedUserIds =
+    useMemo(() => {
+      if (hasCustomParticipants) {
+        const existingMemberIds =
+          new Set(memberIds.map(String));
 
-    const existingMemberIds = new Set(memberIds.map(String));
-    return selectedUserIds.filter((id) => existingMemberIds.has(String(id)));
-  }, [hasCustomParticipants, memberIds, selectedUserIds]);
+        return selectedUserIds.filter(
+          (id) =>
+            existingMemberIds.has(
+              String(id)
+            )
+        );
+      }
 
-  const getErrorMessage = (error: unknown, fallback: string) => {
+      return memberIds;
+    }, [
+      hasCustomParticipants,
+      memberIds,
+      selectedUserIds,
+    ]);
+
+  const toggleUserSelection = (
+    userId: Id
+  ) => {
+    setHasCustomParticipants(true);
+
+    setSelectedUserIds((current) => {
+      let sourceIds: Id[];
+
+      if (hasCustomParticipants) {
+        sourceIds = current;
+      } else {
+        sourceIds = memberIds;
+      }
+
+      const isSelected =
+        sourceIds.some(
+          (id) =>
+            String(id) ===
+            String(userId)
+        );
+
+      if (isSelected) {
+        return sourceIds.filter(
+          (id) =>
+            String(id) !==
+            String(userId)
+        );
+      }
+
+      return [
+        ...sourceIds,
+        userId,
+      ];
+    });
+  };
+
+  const getErrorMessage = (
+    error: unknown,
+    fallback: string
+  ) => {
     if (error instanceof Error && error.message.trim()) {
-      return error.message.replace(/^Wystąpił błąd:\s*/i, "");
+      return error.message.replace(
+        /^Wystąpił błąd:\s*/i,
+        ""
+      );
     }
 
     return fallback;
-  };
-
-  const toggleUserSelection = (userId: Id) => {
-    setHasCustomParticipants(true);
-    setSelectedUserIds((current) =>
-      (hasCustomParticipants ? current : memberIds).some(
-        (id) => String(id) === String(userId)
-      )
-        ? (hasCustomParticipants ? current : memberIds).filter(
-            (id) => String(id) !== String(userId)
-          )
-        : [...(hasCustomParticipants ? current : memberIds), userId]
-    );
   };
 
   const handleSubmit = async (e: FormEvent) => {

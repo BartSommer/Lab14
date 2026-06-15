@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 import TestApiComponent from "../components/TestApiComponent";
 import Navbar from "../components/Navbar/Navbar";
 import TransactionForm from "../components/TransactionForm/TransactionForm";
@@ -17,14 +18,18 @@ import GroupDebtsPage from "../pages/GroupsPage/GroupDebtPage";
 import GroupNotificationsListener from "../components/GroupNotifications/GroupNotificationsListener";
 
 const App = () => {
+
+
   return (
     <Router>
       <GroupNotificationsListener />
       <Navbar />
       <BalanceBar />
+
       <div className="container">
         <Routes>
           <Route path="/" element={<HomePage />} />
+
           <Route
             path="/add-transaction"
             element={
@@ -33,6 +38,7 @@ const App = () => {
               </PrivateRoute>
             }
           />
+
           <Route
             path="/transactions"
             element={
@@ -41,6 +47,7 @@ const App = () => {
               </PrivateRoute>
             }
           />
+
           <Route
             path="/groups"
             element={
@@ -49,6 +56,7 @@ const App = () => {
               </PrivateRoute>
             }
           />
+
           <Route
             path="/groups/:groupId/debts"
             element={
@@ -57,7 +65,9 @@ const App = () => {
               </PrivateRoute>
             }
           />
+
           <Route path="/test" element={<TestApiComponent />} />
+
           <Route
             path="/register"
             element={
@@ -66,6 +76,7 @@ const App = () => {
               </PublicRoute>
             }
           />
+
           <Route
             path="/login"
             element={
@@ -76,6 +87,7 @@ const App = () => {
           />
         </Routes>
       </div>
+
       <ToastContainer />
     </Router>
   );

@@ -84,7 +84,7 @@ const TransactionList = () => {
     const errors: { [key: string]: string } = {};
     const { amount, type, tags, notes } = editValues;
 
-    if (!amount || parseFloat(amount.toString()) <= 0) {
+    if (!amount || Number.parseFloat(amount.toString()) <= 0) {
       errors.amount = "Kwota musi być większa od zera.";
     }
 
@@ -146,6 +146,14 @@ const TransactionList = () => {
     setShowDeleteModal(true);
   };
 
+  const getTransactionTypeLabel = (type: string) => {
+    if (type === "INCOME") {
+      return "Przychód";
+    }
+
+    return "Wydatek";
+  };
+
   const deleteTransaction = async () => {
     if (!transactionToDelete) return;
 
@@ -165,6 +173,9 @@ const TransactionList = () => {
     setShowDeleteModal(false);
     setTransactionToDelete(null);
   };
+
+
+
 
   if (loading) return <p>Ładowanie...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
@@ -212,14 +223,15 @@ const TransactionList = () => {
                       <option value="INCOME">Przychód</option>
                       <option value="EXPENSE">Wydatek</option>
                     </select>
+
                     {editErrors.type && (
-                      <p className={styles.error}>{editErrors.type}</p>
+                      <p className={styles.error}>
+                        {editErrors.type}
+                      </p>
                     )}
                   </>
-                ) : transaction.type === "INCOME" ? (
-                  "Przychód"
                 ) : (
-                  "Wydatek"
+                  getTransactionTypeLabel(transaction.type)
                 )}
               </td>
               <td>

@@ -10,6 +10,7 @@ COPY tsconfig*.json ./
 COPY vite.config.ts ./
 COPY public public
 COPY src src
+
 RUN npm run build
 
 FROM nginxinc/nginx-unprivileged:1.27-alpine

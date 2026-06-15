@@ -36,11 +36,14 @@ function parseJwt(token: string): User | null {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
     const jsonPayload = decodeURIComponent(
-        window
-            .atob(base64)
-            .split("")
-            .map((c) => `%${("00" + c.charCodeAt(0).toString(16)).slice(-2)}`)
-            .join("")
+      globalThis
+        .atob(base64)
+        .split("")
+        .map(
+          (c) =>
+            `%${("00" + (c.codePointAt(0) ?? 0).toString(16)).slice(-2)}`
+        )
+        .join("")
     );
     return JSON.parse(jsonPayload);
   } catch (e) {
@@ -50,8 +53,8 @@ function parseJwt(token: string): User | null {
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-                                                                        children,
-                                                                      }) => {
+  children,
+}) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const token = localStorage.getItem("accessToken");
     if (!token || isTokenExpired(token)) {
@@ -71,35 +74,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = useCallback(() => {
     localStorage.removeItem("accessToken");
-    setIsAuthenticated(false)
+    setIsAuthenticated(false);
     setUser(null);
   }, []);
 
-  const login = useCallback((token: string) => {
-    // POPRAWKA DLA SONARA: Walidacja i oczyszczanie danych wejściowych (Sanitizacja)
-    if (!token || typeof token !== "string") {
-      console.error("Token nie istnieje lub ma niepoprawny format typu");
-      return;
-    }
+ const login = useCallback((token: string) => {
+   const parsedUser = parseJwt(token);
 
-    const cleanToken = token.trim();
-    const jwtPattern = /^[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+$/;
+   if (!parsedUser) {
+     console.error("Nie udało się sparsować użytkownika z tokena");
+     return;
+   }
 
-    if (!jwtPattern.test(cleanToken)) {
-      console.error("Odrzucono zapis: nieprawidłowy format struktury tokenu JWT");
-      return;
-    }
+   const parts = token.split(".");
 
-    const parsedUser = parseJwt(cleanToken);
-    if (!parsedUser) {
-      console.error("Nie udało się sparsować użytkownika z tokena");
-      return;
-    }
+   if (parts.length !== 3) {
+     console.error("Nieprawidłowy token JWT");
+     return;
+   }
 
-    localStorage.setItem("accessToken", cleanToken);
-    setIsAuthenticated(true);
-    setUser(parsedUser);
-  }, []);
+   globalThis.localStorage.setItem(
+     "accessToken",
+     token
+   );
+
+   setIsAuthenticated(true);
+   setUser(parsedUser);
+ }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -113,8 +114,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [logout]);
 
   const value = useMemo(
-      () => ({ isAuthenticated, login, logout, user }),
-      [isAuthenticated, login, logout, user]
+    () => ({ isAuthenticated, login, logout, user }),
+    [isAuthenticated, login, logout, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
