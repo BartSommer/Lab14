@@ -15,7 +15,9 @@ interface GroupNotification {
 
 const getWebSocketUrl = (token: string) => {
   const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-  return `${protocol}://localhost:8080/ws/group-notifications?token=${encodeURIComponent(token)}`;
+  // Oczyszczamy dodatkowo token z ewentualnych znaków sterujących nowej linii
+  const cleanToken = token.replace(/[\r\n]/g, "");
+  return `${protocol}://localhost:8080/ws/group-notifications?token=${encodeURIComponent(cleanToken)}`;
 };
 
 const GroupNotificationsListener = () => {
@@ -26,6 +28,13 @@ const GroupNotificationsListener = () => {
 
     const token = localStorage.getItem("accessToken");
     if (!token) return;
+
+    // POPRAWKA DLA TS I SONARA: Bezpieczne i uniwersalne wyrażenie regularne dla formatu JWT
+    const jwtPattern = /^[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+$/;
+    if (!jwtPattern.test(token)) {
+      console.error("Nieprawidłowy format tokenu uwierzytelniającego.");
+      return;
+    }
 
     const socket = new WebSocket(getWebSocketUrl(token));
 
