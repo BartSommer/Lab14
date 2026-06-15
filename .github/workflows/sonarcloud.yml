@@ -26,7 +26,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build backend
-        working-directory: backend/PASiR_Sommer_Bartosz
+        working-directory: backend/PASiR_Nazwisko_Imie
         run: mvn clean install -DskipTests
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -44,6 +44,6 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5.0.0
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
